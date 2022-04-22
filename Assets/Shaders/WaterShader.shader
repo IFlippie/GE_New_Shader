@@ -1,59 +1,88 @@
-Shader "Unlit/WaterShader"
+Shader "Custom/WaterShader"
 {
+    //Properties are variables that will be shown in the Editor like publics in c#
     Properties
     {
-        _MainTex ("Texture", 2D) = "white" {}
-        [NoScaleOffset] _NormalMap("Normals", 2D) = "bump" {}
+        _Color("Color", Color) = (0,0,0,1)
+        _Strength("Strength", Range(0,1)) = 0.5
+        _Speed("Speed", Range(-200, 200)) = 100
+        _Direction ("Direction (2D)", Vector) = (1,0,0,0)
+        _Wavelength ("Wavelength", Float) = 10
     }
     SubShader
     {
-        Tags { "RenderType"="Opaque" }
-        LOD 100
+        Tags { "RenderType"="transparent" }
 
         Pass
         {
-            CGPROGRAM
-            #pragma vertex vert
-            #pragma fragment frag
-            // make fog work
-            #pragma multi_compile_fog
+        Cull Off
 
-            #include "UnityCG.cginc"
+        CGPROGRAM
+        //These pragma's are ways of announcing that you have functions or variables with important information in them
+        #pragma vertex vertexFunc
+        #pragma fragment fragmentFunc
+        #define PI 3.14159265359f
 
-            struct appdata
-            {
-                float4 vertex : POSITION;
-                float2 uv : TEXCOORD0;
-            };
+        float4 _Color;
+        float _Strength;
+        float _Speed;
+        float2 _Direction;
+        float _Wavelength;
 
-            struct v2f
-            {
-                float2 uv : TEXCOORD0;
-                UNITY_FOG_COORDS(1)
-                float4 vertex : SV_POSITION;
-            };
+        struct vertexInput
+        {
+            float4 vertex : POSITION;
+        };
 
-            sampler2D _MainTex;
-            float4 _MainTex_ST;
+        struct vertexOutput
+        {
+            float4 pos : SV_POSITION;
+            half3 worldNormal : TEXCOORD0;
+        };
 
-            v2f vert (appdata v)
-            {
-                v2f o;
-                o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = TRANSFORM_TEX(v.uv, _MainTex);
-                UNITY_TRANSFER_FOG(o,o.vertex);
-                return o;
-            }
+        vertexOutput vertexFunc(vertexInput IN)
+        {
+            vertexOutput o;
 
-            fixed4 frag (v2f i) : SV_Target
-            {
-                // sample the texture
-                fixed4 col = tex2D(_MainTex, i.uv);
-                // apply fog
-                UNITY_APPLY_FOG(i.fogCoord, col);
-                return col;
-            }
-            ENDCG
+            //float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
+            //float4 d = normalize(_Direction);
+
+            //float4 displacement = (cos(worldPos.y) + cos(worldPos.x + (_Speed * _Time)));
+            //worldPos.y = worldPos.y + (displacement * _Strength);
+
+            //o.pos = mul(UNITY_MATRIX_VP, worldPos);
+
+            float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
+
+            float k = 2 * PI / _Wavelength;
+            float2 d = normalize(_Direction);
+            float f = k * (dot(d, worldPos.xz) - _Speed * _Time.y);
+            float a = _Strength/k;
+
+            worldPos.x += d.x * (a * cos(f));
+            worldPos.y = a * sin(f);
+            worldPos.z += d.y * (a * cos(f));
+
+            o.pos = mul(UNITY_MATRIX_VP, worldPos);
+
+            float3 tangent = float3( 1 - d.x * d.x * (_Strength * sin(f)), d.x * (_Strength * cos(f)), -d.x * d.y * (_Strength * sin(f)));
+			float3 binormal = float3( -d.x * d.y * (_Strength * sin(f)), d.y * (_Strength * cos(f)), 1 - d.y * d.y * (_Strength * sin(f)));
+			float3 normal = normalize(cross(binormal, tangent));
+
+            //float3 tangent = normalize(float3(1 - k * _Strength * sin(f), k * _Strength * cos(f), 0));
+            //float3 normal = float3(-tangent.y, tangent.x, 0);
+            o.worldNormal = normal;
+            //left off at multiple waves https://catlikecoding.com/unity/tutorials/flow/waves/ , and add water refraction and water foam to finish it
+            return o;
+        }
+
+        float4 fragmentFunc(vertexOutput IN) : COLOR
+        {
+            return _Color;
+        }
+
+        ENDCG
+           
         }
     }
 }
