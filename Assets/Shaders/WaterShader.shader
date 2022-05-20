@@ -8,10 +8,13 @@ Shader "Custom/WaterShader"
         _Speed("Speed", Range(-200, 200)) = 100
         _Direction ("Direction (2D)", Vector) = (1,0,0,0)
         _Wavelength ("Wavelength", Float) = 10
+        [NoScaleOffset] _NormalMap ("Normalmap ", 2D) = "" { }
+        [NoScaleOffset] _ColorControl ("Fresnel", 2D) = "" { }
+        _WaveScale ("Wave scale", Range (0.02,0.15)) = .07
     }
     SubShader
     {
-        Tags { "RenderType"="transparent" }
+        Tags { "RenderType"="transparent" "Queue" = "Transparent" }
 
         Pass
         {
@@ -23,11 +26,17 @@ Shader "Custom/WaterShader"
         #pragma fragment fragmentFunc
         #define PI 3.14159265359f
 
+        #include "UnityCG.cginc"
+
         float4 _Color;
         float _Strength;
         float _Speed;
         float2 _Direction;
         float _Wavelength;
+        sampler2D _NormalMap;
+        sampler2D _ColorControl;
+        float _WaveScale;
+        float4 _WaveOffset;
 
         struct vertexInput
         {
@@ -38,13 +47,15 @@ Shader "Custom/WaterShader"
         {
             float4 pos : SV_POSITION;
             half3 worldNormal : TEXCOORD0;
+            float2 uv : TEXCOORD1;
+            float3 viewDir : TEXCOORD2;
         };
 
-        vertexOutput vertexFunc(vertexInput IN)
+        vertexOutput vertexFunc(vertexInput i)
         {
             vertexOutput o;
 
-            //float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
+            //float4 worldPos = mul(unity_ObjectToWorld, i.vertex);
             //float4 d = normalize(_Direction);
 
             //float4 displacement = (cos(worldPos.y) + cos(worldPos.x + (_Speed * _Time)));
@@ -52,7 +63,7 @@ Shader "Custom/WaterShader"
 
             //o.pos = mul(UNITY_MATRIX_VP, worldPos);
 
-            float4 worldPos = mul(unity_ObjectToWorld, IN.vertex);
+            float4 worldPos = mul(unity_ObjectToWorld, i.vertex);
 
             float k = 2 * PI / _Wavelength;
             float2 d = normalize(_Direction);
@@ -69,16 +80,32 @@ Shader "Custom/WaterShader"
 			float3 binormal = float3( -d.x * d.y * (_Strength * sin(f)), d.y * (_Strength * cos(f)), 1 - d.y * d.y * (_Strength * sin(f)));
 			float3 normal = normalize(cross(binormal, tangent));
 
-            //float3 tangent = normalize(float3(1 - k * _Strength * sin(f), k * _Strength * cos(f), 0));
-            //float3 normal = float3(-tangent.y, tangent.x, 0);
+            float offset4 = _Speed * (_Time.x * _WaveScale);
+            float4 offsetClamped = float4(fmod(offset4, 1),fmod(offset4, 1),fmod(offset4, 1),fmod(offset4, 1));
+            _WaveOffset = offsetClamped;
+
+            float4 temp;
+            temp.xyzw = worldPos.xzxz * _WaveScale + _WaveOffset;
+	        o.uv = temp.xyzw;
+            o.viewDir.xzy = normalize( WorldSpaceViewDir(i.vertex) );
+
             o.worldNormal = normal;
-            //left off at multiple waves https://catlikecoding.com/unity/tutorials/flow/waves/ , and add water refraction and water foam to finish it
+
             return o;
         }
 
-        float4 fragmentFunc(vertexOutput IN) : COLOR
+        half4 fragmentFunc(vertexOutput i) : COLOR
         {
-            return _Color;
+            half3 bump = UnpackNormal(tex2D( _NormalMap, i.uv )).rgb;
+            
+            //https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Fresnel-Effect-Node.html
+            half fresnel = dot( i.viewDir, bump );
+	        half4 water = tex2D( _ColorControl, float2(fresnel,fresnel) );
+	
+	        half4 col;
+	        col.rgb = lerp( water.rgb, _Color.rgb, water.a );
+	        col.a = _Color.a;
+            return col;
         }
 
         ENDCG

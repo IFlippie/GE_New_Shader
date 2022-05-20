@@ -7,8 +7,8 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: DirectionWater
-  m_Shader: {fileID: 4800000, guid: 215adad891bdfe44c8e6a4f4d4da7255, type: 3}
+  m_Name: NM2Material
+  m_Shader: {fileID: 4800000, guid: e8f985c2ad82d1241bcb0903c6bd05a2, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -20,11 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BumpMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ColorControl:
-        m_Texture: {fileID: 2800000, guid: f42921604ff053143bcbf15fb3d1fe1b, type: 3}
+        m_Texture: {fileID: 2800000, guid: 47af538ec0a618646ad2c82fdf945b81, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _DetailAlbedoMap:
@@ -44,15 +40,11 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: d104d55bb97b4134884d6d7c3c3120d2, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _NormalMap:
-        m_Texture: {fileID: 2800000, guid: 55d8995fa05eeef4dbf74908e012333c, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _OcclusionMap:
@@ -77,15 +69,10 @@ Material:
     - _Parallax: 0.02
     - _SmoothnessTextureChannel: 0
     - _SpecularHighlights: 1
-    - _Speed: 2
     - _SrcBlend: 1
-    - _Strength: 0.05
     - _UVSec: 0
-    - _WaveScale: 0.07
-    - _Wavelength: 10
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.7122642, g: 0.93554133, b: 1, a: 1}
-    - _Direction: {r: 0, g: 1, b: 0, a: 0}
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
   m_BuildTextureStacks: []
