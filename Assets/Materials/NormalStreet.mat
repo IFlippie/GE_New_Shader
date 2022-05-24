@@ -7,7 +7,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: NM3Material
+  m_Name: NormalStreet
   m_Shader: {fileID: 4800000, guid: d16eaf62fbfeb024dacb0d096bf625fb, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
@@ -40,9 +40,9 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 2800000, guid: d104d55bb97b4134884d6d7c3c3120d2, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
+        m_Texture: {fileID: 2800000, guid: 1b13336d17a14be49826015ac2ef9ebf, type: 3}
+        m_Scale: {x: 0.61, y: 0.5}
+        m_Offset: {x: 0, y: 0.24}
     - _MetallicGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
